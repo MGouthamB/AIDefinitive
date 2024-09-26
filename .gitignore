@@ -1,8 +1,23 @@
-.idea\
-App\migrations
+# Ignore all .pyc files
 *.pyc
+
+# Ignore the .idea directory (likely from JetBrains IDEs like PyCharm)
+.idea/
+
+# Ignore all migration files in the App/migrations directory
+App/migrations/
+
+# Ignore the SQLite database file
 db.sqlite3
-App\test*
-AIDefinitive\.env
-Documents\*
-AIDefinitive\temp.html
+
+# Ignore test files in the App directory
+App/test*
+
+# Ignore the .env file in the AIDefinitive directory
+AIDefinitive/.env
+
+# Ignore everything inside the Documents directory
+Documents/*
+
+# Ignore the temp.html file in the AIDefinitive directory
+AIDefinitive/temp.html
