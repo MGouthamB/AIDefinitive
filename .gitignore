@@ -21,3 +21,6 @@ Documents/*
 
 # Ignore the temp.html file in the AIDefinitive directory
 AIDefinitive/temp.html
+
+# Ignore the temp.html file in the AIDefinitive directory
+AIDefinitive/Signed_Documents/*
