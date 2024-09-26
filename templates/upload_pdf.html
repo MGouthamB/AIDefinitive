@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/3.0.0-beta.3/signature_pad.umd.js"></script>
+    <style>
+        #pdf-container {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            overflow: auto;
+        }
+        #signature-pad {
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sign PDF</h1>
+    <div id="pdf-container">
+        <canvas id="pdf-canvas"></canvas>
+    </div>
+    <div>
+        <canvas id="signature-pad" width="400" height="200"></canvas>
+    </div>
+    <button id="clear-signature">Clear Signature</button>
+    <button id="save-signature">Save Signature</button>
+    <script>
+        // Load the PDF
+        var url = '{{ pdf }}';
+        var pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.worker.min.js';
+
+        var pdfDoc = null,
+            pageNum = 1,
+            scale = 1.5,
+            canvas = document.getElementById('pdf-canvas'),
+            ctx = canvas.getContext('2d');
+
+        function renderPage(num) {
+            pdfDoc.getPage(num).then(function(page) {
+                var viewport = page.getViewport({ scale: scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                var renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
+        }
+
+        pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            renderPage(pageNum);
+        });
+
+        // Initialize signature pad
+        var signaturePad = new SignaturePad(document.getElementById('signature-pad'));
+
+        document.getElementById('clear-signature').addEventListener('click', function () {
+            signaturePad.clear();
+        });
+
+        document.getElementById('save-signature').addEventListener('click', function () {
+            if (signaturePad.isEmpty()) {
+                alert('Please provide a signature first.');
+                return;
+            }
+
+            var signatureData = signaturePad.toDataURL('image/png');
+            var formData = new FormData();
+            formData.append('pdf_url', url);
+            formData.append('signature_data', signatureData);
+
+            fetch('{% url "sign_pdf" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => response.text())
+              .then(result => {
+                  alert(result);
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+              });
+        });
+
+
+    </script>
+<script>
+
+</script>
+</body>
+</html>

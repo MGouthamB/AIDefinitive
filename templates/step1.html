@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>AID Payment Step 1</title>
+    {% include "styles.html" %}
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://dynamicspace.groziit.com/static/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            margin-bottom: 30px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+        }
+
+        a{
+            text-decoration: none !important;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            $('input:not([name="csrfmiddlewaretoken"]):not([name="files"]):not([name="formname"]),textarea,select').each(function () {
+                $(this).attr('name', $(this).attr('name'));
+                $(this).attr('id', 'id' + $(this).attr('name'));
+                if ($(this).is('select')) {
+                    $(this).attr('class', "form-select");
+                } else {
+                    $(this).attr('class', "form-control");
+                }
+                $(this).attr('placeholder', $(this).attr('name'));
+                var label = $('<label for="' + $(this).attr('id') + '">' + $(this).attr('name') + '</label>');
+
+                // Wrap the input element and label element inside divs
+                $(this).wrap('<div class="col-md-12"><div class="form-floating"></div></div>');
+                $(this).parent().append(label);
+            });
+        });
+    </script>
+</head>
+<body style="background-color:white">
+{% include 'header.html' %}
+<main>
+    <div class="container">
+
+        <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center"
+                 style="padding-top: max(100px, 1.5rem);!important;">
+            {% include 'steps.html' %}
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+                        <div class="card">
+                            <div class="card-body">
+                                <img src="{% static 'assets/img/AI_Definitive_transparent_logo.png' %}"
+                                     style="height: 50px;display: block; margin: 25px auto;">
+                                <h5 class="card-title mb-3"
+                                    style="text-align: center;font-size: 2em;font-weight: 800;color: black;=">
+                                    Agreement Details</h5>
+
+                                <!-- Floating Labels Form -->
+                                <form class="row g-3" method="post" action="/step2/{{ link }}/" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <input type="text" name="Full Name" required>
+                                    <input type="text" name="Phone Number" required>
+                                    <input type="email" name="email" required>
+                                    <input type="text" name="Address" required>
+                                    <input type="text" id="ssn" name="SSN Number" maxlength="11"
+                                           placeholder="XXX-XX-XXXX"
+                                           pattern="\d{3}-\d{2}-\d{4}" required>
+                                    <small>SSN Format: XXX-XX-XXXX</small>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-dark">Submit</button>
+                                        <button type="reset" class="btn btn-secondary">Reset</button>
+                                    </div>
+                                </form><!-- End floating Labels Form -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+{% include 'footer.html' %}
+<script>
+    $('#steps :nth-child(1)').addClass('is-active');
+</script>
+</body>
+</html>

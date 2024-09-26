@@ -1,0 +1,313 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    {% include 'styles.html' %}
+    <style>
+
+        .btn-primary {
+            background-color: rgba(87, 72, 217, 0.7);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: rgba(87, 72, 217, 1);
+        }
+
+        #adobe-dc-view {
+            background: rgb(255, 255, 255);
+            box-shadow: rgba(127, 137, 161, 0.3) 0 0 30px;
+            margin-bottom: 50px;
+        }
+
+        #sign-view {
+            position: sticky;
+            padding: 30px;
+            top: max(100px, 1.5rem);
+            background-color: white;
+            box-shadow: rgba(127, 137, 161, 0.3) 0 0 30px;
+            z-index: 10;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 925px;
+            }
+
+            #pdf-container {
+                margin-top: 130px;
+            }
+        }
+    </style>
+</head>
+<body>
+{% include 'header.html' %}
+
+<!-- Modal -->
+<div class="modal fade bd-example-modal-lg" id="signatureModal" tabindex="-1" role="dialog"
+     aria-labelledby="signatureModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="min-width: 800px">
+        <div class="modal-content">
+            <div class="modal-header" style="border: none">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center">Sign in the canvas below to agree terms and conditions.</p>
+                <div class="row">
+                    <div class="col-md-12 d-flex justify-content-center align-items-center">
+                        <canvas id="sig-canvas" width="400" height="100"
+                                style="border:1px dashed rgba(87, 72, 217, 0.7)">
+                            Get a better browser, bro.
+                        </canvas>
+                    </div>
+                </div>
+                <div class="row mb-5 mt-3">
+                    <div class="col-md-12 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-primary" id="sig-submitBtn">Submit</button>
+                        <button class="btn btn-default" id="sig-clearBtn">Clear Signature</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-3" id="sign-view">
+    <div class="row">
+        <div class="col-md-12 d-flex justify-content-between align-items-center space-be">
+            <h4>E-Signature
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#signatureModal">
+                    <img src="{% static 'assets/img/e-sign.png' %}" style="height:1rem"> Click here to sign
+                </button>
+            </h4>
+            <form method="post" action="/step3/{{ link }}/" enctype="multipart/form-data" name="sign_form">
+                {% csrf_token %}
+                <input type="hidden" name="sign" id="sign" required/>
+                <input type="hidden" name="Full Name" value="{{ name }}">
+                <input type="hidden" name="SSN Number" value="{{ SNN }}">
+                <input type="hidden" name="Address" value="{{ Address }}">
+                <h4><span style="padding-right: 10px">Initials :</span><input type="text" name="Initials" id="initials"
+                                                                              style="width: 70px" required></h4>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<div class="container" id="pdf-container">
+    {% include 'steps.html' %}
+    <div id="adobe-dc-view" style="height: 70vh; width: 100%;margin-top: 20px;background-color: white;"></div>
+</div>
+
+{% include 'footer.html' %}
+
+<script src="https://acrobatservices.adobe.com/view-sdk/viewer.js" crossorigin="anonymous"></script>
+<script>
+    setTimeout(function () {
+
+        if (document.querySelector('iframe')) {
+            console.log("The page contains an iframe.");
+        } else {
+            console.log("The page does not contain any iframes.");
+            location.reload();
+        }
+    }, 1000);
+
+</script>
+<script type="text/javascript">
+
+    var attempt = 0;
+
+    function fetchdoc() {
+        var adobeDCView = new AdobeDC.View({
+            clientId: "{{adobe_id}}",
+            divId: "adobe-dc-view",
+            backgroundColor: "FFFFF"
+        });
+        adobeDCView.previewFile({
+                content: {
+                    location:
+                        {url: "{% static request.session.step1_file %}"}
+                },
+                metaData: {fileName: "Agreement.pdf"}
+            },
+            {
+                embedMode: "IN_LINE" // Use IN_LINE embed mode
+            }).then(adobeViewer => {
+        }).catch(error => {
+            alert("Error loading document, please reload the page.");
+            console.log(error);
+            attempt++;
+            if (attempt > 1) {
+                alert("Error loading document, please reload the page.");
+            } else {
+                fetchdoc();
+            }
+        });
+    }
+
+    document.addEventListener("adobe_dc_view_sdk.ready", function () {
+        fetchdoc();
+    });
+</script>
+<script>
+
+    (function () {
+        window.requestAnimFrame = (function (callback) {
+            return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimaitonFrame ||
+                function (callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
+
+        var canvas = document.getElementById("sig-canvas");
+        var ctx = canvas.getContext("2d");
+        ctx.strokeStyle = "#222222";
+        ctx.lineWidth = 4;
+
+        var drawing = false;
+        var mousePos = {
+            x: 0,
+            y: 0
+        };
+        var lastPos = mousePos;
+
+        canvas.addEventListener("mousedown", function (e) {
+            drawing = true;
+            lastPos = getMousePos(canvas, e);
+        }, false);
+
+        canvas.addEventListener("mouseup", function (e) {
+            drawing = false;
+        }, false);
+
+        canvas.addEventListener("mousemove", function (e) {
+            mousePos = getMousePos(canvas, e);
+        }, false);
+
+        // Add touch event support for mobile
+        canvas.addEventListener("touchstart", function (e) {
+
+        }, false);
+
+        canvas.addEventListener("touchmove", function (e) {
+            var touch = e.touches[0];
+            var me = new MouseEvent("mousemove", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(me);
+        }, false);
+
+        canvas.addEventListener("touchstart", function (e) {
+            mousePos = getTouchPos(canvas, e);
+            var touch = e.touches[0];
+            var me = new MouseEvent("mousedown", {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(me);
+        }, false);
+
+        canvas.addEventListener("touchend", function (e) {
+            var me = new MouseEvent("mouseup", {});
+            canvas.dispatchEvent(me);
+        }, false);
+
+        function getMousePos(canvasDom, mouseEvent) {
+            var rect = canvasDom.getBoundingClientRect();
+            return {
+                x: mouseEvent.clientX - rect.left,
+                y: mouseEvent.clientY - rect.top
+            }
+        }
+
+        function getTouchPos(canvasDom, touchEvent) {
+            var rect = canvasDom.getBoundingClientRect();
+            return {
+                x: touchEvent.touches[0].clientX - rect.left,
+                y: touchEvent.touches[0].clientY - rect.top
+            }
+        }
+
+        function renderCanvas() {
+            if (drawing) {
+                ctx.moveTo(lastPos.x, lastPos.y);
+                ctx.lineTo(mousePos.x, mousePos.y);
+                ctx.stroke();
+                lastPos = mousePos;
+            }
+        }
+
+        // Prevent scrolling when touching the canvas
+        document.body.addEventListener("touchstart", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, {passive: false});
+        document.body.addEventListener("touchend", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, {passive: false});
+        document.body.addEventListener("touchmove", function (e) {
+            if (e.target == canvas) {
+                e.preventDefault();
+            }
+        }, {passive: false});
+
+        (function drawLoop() {
+            requestAnimFrame(drawLoop);
+            renderCanvas();
+        })();
+
+        function clearCanvas() {
+            canvas.width = canvas.width;
+        }
+
+        function isCanvasBlank(canvas) {
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+
+            return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data.toString() ===
+                blank.getContext('2d').getImageData(0, 0, blank.width, blank.height).data.toString();
+        }
+
+        const blank = document.getElementById("sign");
+
+        // Set up the UI
+        const clearBtn = document.getElementById("sig-clearBtn");
+        const submitBtn = document.getElementById("sig-submitBtn");
+        clearBtn.addEventListener("click", function (e) {
+            clearCanvas();
+        }, false);
+        submitBtn.addEventListener("click", function (e) {
+            const dataUrl = canvas.toDataURL();
+            const signature = document.getElementById("sign");
+            signature.value = dataUrl;
+            if (isCanvasBlank(canvas)) {
+                alert("Please sign the document");
+            } else if ($("#initials").val() === "") {
+                alert("Please Fill the Initials");
+            } else {
+                document.forms["sign_form"].submit();
+            }
+        }, false);
+
+    })();
+
+</script>
+<script>
+    $('#steps :nth-child(2)').addClass('is-active');
+</script>
+</body>
+</html>
