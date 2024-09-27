@@ -26,8 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 stripe.api_key = settings.STRIPE_KEY
 
 # Register the Calibri font
-pdfmetrics.registerFont(TTFont('Calibri', 'calibri.ttf'))
-pdfmetrics.registerFont(TTFont('Calibri-Italic', 'calibrii.ttf'))
+pdfmetrics.registerFont(TTFont('Calibri', settings.CALIBRI))
+pdfmetrics.registerFont(TTFont('Calibri-Italic', settings.CALIBRII))
 
 
 @staff_member_required
