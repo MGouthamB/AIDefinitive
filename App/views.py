@@ -140,7 +140,7 @@ def pdf_changes(path, input_file, changes, audit=None, initials=None):
         pdf_writer.add_page(page)
 
     if audit is not None:
-        audit_pdf = PdfReader(r"App\Audit.pdf")
+        audit_pdf = PdfReader(r"App/Audit.pdf")
         audit_page = audit_pdf.pages[0]
         packet = BytesIO()
         c = canvas.Canvas(packet, pagesize=(audit_page.mediabox.right, audit_page.mediabox.top))
@@ -220,7 +220,7 @@ def step2(request, link):
                     ]
                 }
             }
-            step1_file = pdf_changes("Documents", r"App\AI_Definitve_Non_Compete_Agreement.pdf", changes)
+            step1_file = pdf_changes("Documents", os.path.join(BASE_DIR, "App/AI_Definitve_Non_Compete_Agreement.pdf"), changes)
             request.session["step1_file"] = step1_file
             request.session["email"] = request.POST['email']
             request.session["phno"] = request.POST['Phone Number']
@@ -300,7 +300,7 @@ def step3(request, link):
                     ]
                 }
             }
-            step2_file = pdf_changes("Documents", r"App\AI_Definitive_Promissory_Note.pdf", changes)
+            step2_file = pdf_changes("Documents", os.path.join(BASE_DIR, "App/AI_Definitive_Promissory_Note.pdf"), changes)
             request.session["step2_file"] = step2_file
 
             request.session["sign1"] = request.POST["sign"]
@@ -388,7 +388,7 @@ def payment_completed(request):
                 ip_address
             ]
 
-            step1_file = pdf_changes("Documents", rf"Documents\{request.session['step1_file']}", changes,
+            step1_file = pdf_changes("Documents", rf"Documents/{request.session['step1_file']}", changes,
                                      audit=audit_details, initials=request.session["initials"])
             os.remove(BASE_DIR / 'Documents' / request.session['step1_file'])
 
@@ -406,7 +406,7 @@ def payment_completed(request):
 
             audit_details[3] = request.session["sign2_time"]
 
-            step2_file = pdf_changes("Documents", rf"Documents\{request.session['step2_file']}", changes,
+            step2_file = pdf_changes("Documents", rf"Documents/{request.session['step2_file']}", changes,
                                      audit=audit_details, initials=request.session["initials"])
             os.remove(BASE_DIR / 'Documents' / request.session['step2_file'])
 
