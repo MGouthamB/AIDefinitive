@@ -78,7 +78,7 @@ def check_link(link, email):
     except Allowed_User.DoesNotExist:
         return "Authentication error with link and email"
     except Exception as e:
-        print(e)
+        print("Check link Exception:",e)
         return "Error 404"
 
 
@@ -134,7 +134,6 @@ def pdf_changes(path, input_file, changes, audit=None, initials=None):
             page.merge_page(new_page)
 
         except Exception as e:
-            print("ooooooo", e)
             pass
 
         pdf_writer.add_page(page)
@@ -448,6 +447,7 @@ def payment_completed(request):
         return HttpResponse("Error")
 
     except Exception as e:
+        print("Payment Exception:",e)
         return HttpResponse("Invalid Request")
 
 
