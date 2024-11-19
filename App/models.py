@@ -30,5 +30,5 @@ class Allowed_User(models.Model):
     def save(self, *args, **kwargs):
         fernet = Fernet(os.getenv('LINK_KEY'))
         self.Email_ID = self.Email_ID.lower()
-        self.link = "https://payments.aidefinitive.com"+fernet.encrypt(self.Email_ID.lower().encode()).decode('utf-8')
+        self.link = "https://payments.aidefinitive.com/step1/"+fernet.encrypt(self.Email_ID.lower().encode()).decode('utf-8')
         super().save(*args, **kwargs)
