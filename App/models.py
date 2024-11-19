@@ -22,11 +22,8 @@ class Allowed_User(models.Model):
         return f"{self.Email_ID}"
 
     def clean(self):
-        try:
-            if self.Expire_Date <= timezone.localdate():
-                raise ValidationError("Expire_Date must be in the future. Remember the server is ")
-        except Exception as e:
-            raise ValidationError("Please Validate your data")
+        if self.Expire_Date <= timezone.localdate():
+            raise ValidationError("Expire_Date must be in the future.")
 
     def save(self, *args, **kwargs):
         try:
