@@ -355,6 +355,9 @@ def get_client_ip(request):
             ip = x_forwarded_for.split(',')[0]
         else:
             ip = request.META.get('REMOTE_ADDR')
+
+        print("HTTP_X_FORWARDED_FOR:", request.META.get('HTTP_X_FORWARDED_FOR'))
+        print("REMOTE_ADDR:", request.META.get('REMOTE_ADDR'))
         return ip
     except Exception as e:
         return "Unable to get IP"
