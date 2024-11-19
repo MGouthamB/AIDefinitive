@@ -341,7 +341,7 @@ def step4(request, link):
             if "sign2" in request.session:
                 request.session.modified = True
 
-            return redirect('https://buy.stripe.com/test_aEU4gpe2M0u009idQQ')
+            return redirect(os.getenv('PAYMENT_LINK'))
         except Exception as e:
             print(e)
             return redirect('/step1/' + link + '/')
