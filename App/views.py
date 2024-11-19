@@ -389,7 +389,7 @@ def payment_completed(request):
                 }
             }
 
-            ip_address, is_routable = get_client_ip(request)
+            ip_address = get_client_ip(request)
 
             audit_details = [
                 request.session["name"],
