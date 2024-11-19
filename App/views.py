@@ -17,7 +17,7 @@ import string, random, os, stripe
 from django.contrib.admin.views.decorators import staff_member_required
 from django.conf import settings
 from django.http import FileResponse, Http404
-from ipware import get_client_ip
+# from ipware import get_client_ip
 from cryptography.fernet import Fernet
 from django.utils import timezone
 
@@ -348,6 +348,16 @@ def step4(request, link):
 
     return redirect('/step1/' + link + '/')
 
+def get_client_ip(request):
+    try:
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+    except Exception as e:
+        return "Unable to get IP"
 
 def payment_completed(request):
     try:
