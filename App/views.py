@@ -352,7 +352,7 @@ def step4(request, link):
 def payment_completed(request):
     try:
 
-        checkout_session = stripe.checkout.Session.retrieve(request.GET['stripe'])
+        checkout_session = stripe.checkout.Session.retrieve(request.GET['session_id'])
         payment_intent_id = checkout_session.payment_intent
 
         try:
