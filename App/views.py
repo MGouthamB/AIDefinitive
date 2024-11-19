@@ -387,9 +387,9 @@ def payment_completed(request):
                 ip_address
             ]
 
-            step1_file = pdf_changes("Documents", rf"Documents/{request.session['step1_file']}", changes,
+            step1_file = pdf_changes("Documents", os.path.join(BASE_DIR, f"Documents/{request.session['step1_file']}"), changes,
                                      audit=audit_details, initials=request.session["initials"])
-            os.remove(BASE_DIR / 'Documents' / request.session['step1_file'])
+            os.remove(os.path.join(BASE_DIR, f"Documents/{request.session['step1_file']}"))
 
             changes = {
                 3: {
