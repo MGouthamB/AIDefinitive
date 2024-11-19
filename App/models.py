@@ -21,12 +21,14 @@ class Allowed_User(models.Model):
         return f"{self.Email_ID}"
 
     def clean(self):
-
-        if self.Expire_Date <= timezone.now().date():
-            raise ValidationError("Expire_Date must be in the future.")
+        try:
+            if self.Expire_Date <= timezone.localdate():
+                raise ValidationError("Expire_Date must be in the future. Remember the server is ")
+        except Exception as e:
+            raise ValidationError("Please Validate your data")
 
     def save(self, *args, **kwargs):
         fernet = Fernet(os.getenv('LINK_KEY'))
         self.Email_ID = self.Email_ID.lower()
-        self.link = os.getenv('HOST_NAME')+""+fernet.encrypt(self.Email_ID.lower().encode()).decode('utf-8')
+        self.link = "https://aidinc.pythonanywhere.com/step1/"+""+fernet.encrypt(self.Email_ID.lower().encode()).decode('utf-8')
         super().save(*args, **kwargs)
