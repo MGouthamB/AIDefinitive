@@ -139,7 +139,7 @@ def pdf_changes(path, input_file, changes, audit=None, initials=None):
         pdf_writer.add_page(page)
 
     if audit is not None:
-        audit_pdf = PdfReader(r"App/Audit.pdf")
+        audit_pdf = PdfReader(os.path.join(BASE_DIR, f"App/Audit.pdf"))
         audit_page = audit_pdf.pages[0]
         packet = BytesIO()
         c = canvas.Canvas(packet, pagesize=(audit_page.mediabox.right, audit_page.mediabox.top))
@@ -405,7 +405,7 @@ def payment_completed(request):
 
             audit_details[3] = request.session["sign2_time"]
 
-            step2_file = pdf_changes("Documents", rf"Documents/{request.session['step2_file']}", changes,
+            step2_file = pdf_changes("Documents", os.path.join(BASE_DIR, f"Documents/{request.session['step2_file']}"), changes,
                                      audit=audit_details, initials=request.session["initials"])
             os.remove(BASE_DIR / 'Documents' / request.session['step2_file'])
 
