@@ -239,6 +239,11 @@ def step2(request, link):
 def step3(request, link):
     if request.method == "POST":
 
+        if request.POST["sign"]=="":
+            print("Step 2 Exception: Didn't receive any sign")
+            return HttpResponse("Invalid Request")
+
+
         try:
             msg = check_link(link, request.session["email"])
             if msg != "":
@@ -321,6 +326,10 @@ def step3(request, link):
 
 def step4(request, link):
     if request.method == "POST":
+
+        if request.POST["sign"]=="":
+            print("Step 3 Exception: Didn't receive any sign")
+            return HttpResponse("Invalid Request")
 
         try:
             msg = check_link(link, request.session["email"])
