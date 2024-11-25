@@ -436,6 +436,7 @@ def payment_completed(request):
 
                 # Save to the database
                 payment = Payment(Payment_ID=payment_intent.id,
+                                  Name= request.session["name"],
                                   Payment_Details=checkout_session.customer_details,
                                   Non_Compete_Document=File(f1, name=step1_file),
                                   Promissory_Document=File(f2, name=step2_file))
